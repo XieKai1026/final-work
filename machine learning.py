@@ -2,7 +2,6 @@
 import os
 import cv2
 import numpy as np
-# from sklearn.cross_validation import train_test_split
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.neighbors import KNeighborsClassifier
@@ -14,15 +13,12 @@ import time
 # ----------------------------------------------------------------------------------
 
 #加载Cifar10数据集，并输出数据集的维数
-
 data_root = os.path.abspath(os.path.join(os.getcwd(), "cifar-10-python/cifar-10-batches-py"))
 X_train,y_train,X_test,y_test = load_CIFAR10(data_root)
-
 print('Training data shape', X_train.shape)
 print('Training labels shape', y_train.shape)
 print('Test data shape', X_test.shape)
 print('Test labels shape', y_test.shape)
-
 start = time.clock()
 # ----------------------------------------------------------------------------------
 # 第二步 图像读取及转换为像素直方图
