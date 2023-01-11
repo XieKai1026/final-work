@@ -32,8 +32,8 @@ def main():
 
     train_size = len(train_data)  # 训练集的长度
     test_size = len(test_data)  # 测试集的长度
-    print(train_size)  # 输出训练集长度看一下，相当于看看有几张图片
-    print(test_size)  # 输出测试集长度看一下，相当于看看有几张图片
+    print(train_size) 
+    print(test_size) 
     testdata = DataLoader(dataset=test_data, batch_size=32, shuffle=True, num_workers=0)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -41,7 +41,7 @@ def main():
 
     class GoogLeNet(nn.Module):
         def __init__(self, num_classes=1000, aux_logits=True,
-                     init_weights=False):  # 这是主分类器  aux_logits是true则启动使用辅助分类器，否则不启动
+                     init_weights=False):  
             super(GoogLeNet, self).__init__()
             self.aux_logits = aux_logits
 
@@ -139,7 +139,7 @@ def main():
                     nn.init.normal_(m.weight, 0, 0.01)
                     nn.init.constant_(m.bias, 0)
 
-    class Inception(nn.Module):  # 搭建多分支架构的一部分
+    class Inception(nn.Module):  
         def __init__(self, in_channels, ch1x1, ch3x3red, ch3x3, ch5x5red, ch5x5,
                      pool_proj):  # self.inception3a = Inception(192, 64, 96, 128, 16, 32, 32)
             super(Inception, self).__init__()
@@ -209,9 +209,9 @@ def main():
     googlenet = GoogLeNet(num_classes=10, aux_logits=True, init_weights=True)
     print(googlenet)  # 打印出模型结构看看
     googlenet.to(device)  # 将模型放到GPU上
-    test1 = torch.ones(64, 3, 224, 224)  # 输出一个测试数据看看模型的数据是几种的，是不是我们需要的种类
+    test1 = torch.ones(64, 3, 224, 224)  
 
-    test1_1, test_2, test_3 = googlenet(test1.to(device))  # 会输出三个分类器的结果，我们查看主分类器的输出最后是不是我们的种类数
+    test1_1, test_2, test_3 = googlenet(test1.to(device)) 
     print(test1_1.shape)
 
     epoch = 10  # 训练额轮数
@@ -227,12 +227,12 @@ def main():
         train_loss = 0  # 训练集的损失初始设为0
         train_num = 0.0
         train_accuracy = 0.0  # 训练集的准确率初始设为0
-        googlenet.train()  # 将模型设置成 训练模式，这里意味着启动辅助分类器
-        train_bar = tqdm(traindata)  # 用于进度条显示，没啥实际用处
-        for step, data in enumerate(train_bar):  # 开始迭代跑， enumerate这个函数不懂可以查查，将训练集分为 data是序号，data是数据
-            img, target = data  # 将data 分为 img图片，target标签
+        googlenet.train()  # 将模型设置成训练模式，这里意味着启动辅助分类器
+        train_bar = tqdm(traindata)  
+        for step, data in enumerate(train_bar): 
+            img, target = data  
             optimizer.zero_grad()  # 清空历史梯度
-            outputs_1 = googlenet(img.to(device))  # 将图片打入网络进行训练,outputs是输出的结果
+            outputs_1 = googlenet(img.to(device))  
             outputs, outputs1, outputs2 = outputs_1  # 因为googlenet有两个辅助分类器，所以会有三个分类结果
 
             loss1 = loss(outputs, target.to(device))  # 第一个为主分类器的损失
@@ -240,19 +240,19 @@ def main():
             loss1_2 = loss(outputs2, target.to(device))  # 第三个是辅助分类器2的损失
 
             loss1_fin = loss1 + loss1_1 * 0.3 + loss1_2 * 0.3  # 计算总损失
-            outputs = torch.argmax(outputs, 1)  # 计算准确率的时候 只是用主分类器的结果，辅助分类器只用来反向传播，防止梯度消失重点，牢记
+            outputs = torch.argmax(outputs, 1) 
             loss1_fin.backward()  # 神经网络反向传播
-            optimizer.step()  # 梯度优化 用上面的abam优化
-            train_loss += abs(loss1_fin.item()) * img.size(0)  # 将所有损失的绝对值加起来
+            optimizer.step()  
+            train_loss += abs(loss1_fin.item()) * img.size(0) 
             accuracy = torch.sum(outputs == target.to(device))  # outputs == target的 即使预测正确的，统计预测正确的个数,从而计算准确率
             train_accuracy = train_accuracy + accuracy  # 求训练集的准确率
             train_num += img.size(0)
 
         print("epoch：{} ， train-Loss：{} , train-accuracy：{}".format(i + 1, train_loss / train_num,
                                                                     train_accuracy / train_num))  # 输出训练情况
-        train_loss_all.append(train_loss / train_num)  # 将训练的损失放到一个列表里 方便后续画图
+        train_loss_all.append(train_loss / train_num) 
         train_accur_all.append(train_accuracy.double().item() / train_num)  # 训练集的准确率
-        test_loss = 0  # 同上 测试损失
+        test_loss = 0 
         test_accuracy = 0.0  # 测试准确率
         test_num = 0
         googlenet.eval()  # 测试模式启动，关闭辅助分类器
@@ -261,7 +261,7 @@ def main():
             for data in test_bar:
                 img, target = data
 
-                outputs_1 = googlenet(img.to(device))  # 这个时候模型只有一个输出结果，因为关闭了辅助分类器
+                outputs_1 = googlenet(img.to(device)) 
 
                 loss2 = loss(outputs_1, target.to(device))
 
